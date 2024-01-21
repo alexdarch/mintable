@@ -1,0 +1,52 @@
+{
+    "account_id": "AjWmyVjJ18FBZpJ9N66mfajjmnkMGwu43JZ8E",
+    "account_owner": null,
+    "amount": -500,
+    "authorized_date": "2023-12-23",
+    "authorized_datetime": null,
+    "category": [ "Transfer", "Credit" ],
+    "category_id": "21005000",
+    "check_number": null,
+    "counterparties": [],
+    "date": "2023-12-23",
+    "datetime": null,
+    "iso_currency_code": "GBP",
+    "location": {
+        "address": null,
+        "city": null,
+        "country": null,
+        "lat": null,
+        "lon": null,
+        "postal_code": null,
+        "region": null,
+        "store_number": null
+    },
+    "logo_url": null,
+    "merchant_entity_id": null,
+    "merchant_name": null,
+    "name": "BANK TRANSFER",
+    "payment_channel": "other",
+    "payment_meta": {
+        "by_order_of": null,
+        "payee": null,
+        "payer": null,
+        "payment_method": null,
+        "payment_processor": null,
+        "ppd_id": null,
+        "reason": null,
+        "reference_number": null
+    },
+    "pending": false,
+    "pending_transaction_id": null,
+    "personal_finance_category": {
+        "confidence_level": "LOW",
+        "detailed": "TRANSFER_IN_ACCOUNT_TRANSFER",
+        "primary": "TRANSFER_IN"
+    },
+    "personal_finance_category_icon_url": "https://plaid-category-icons.plaid.com/PFC_TRANSFER_IN.png",
+    "transaction_code": null,
+    "transaction_id": "MkVmd4kJlvT8543mAqqZTqnwQN1KyBh41ABGD",
+    "transaction_type": "special",
+    "unofficial_currency_code": null,
+    "website": null
+}

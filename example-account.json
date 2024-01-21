@@ -1,0 +1,15 @@
+{
+    "account_id": "4qVNre6PKlhLbPvaJJyzUMM3WaJaVzclLqeE8",
+    "balances": {
+      "available": null,
+      "current": 56302.06,
+      "iso_currency_code": "GBP",
+      "limit": null,
+      "unofficial_currency_code": null
+    },
+    "mask": "8888",
+    "name": "Plaid Mortgage",
+    "official_name": null,
+    "subtype": "mortgage",
+    "type": "loan"
+  }
