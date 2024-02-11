@@ -7,8 +7,10 @@ on:
   pull_request:
     branches: [ master ]
 
-  schedule:
-    - cron:  '0 * * * *'
+  # min(0-59) hour(0-23) day(1-31) month(1-12) dayofweek(0-6)
+  # schedule:
+    # "0 0 * * *" = midnight every day
+    # - cron:  '0 0 * * *'
 
 jobs:
   build:
