@@ -74,6 +74,7 @@ export default async () => {
             })
 
             logInfo('Successfully set up Plaid Integration.')
+            // @ts-ignore
             return resolve()
         } catch (e) {
             logError('Unable to set up Plaid Integration.', e)

@@ -54,7 +54,7 @@ export default async () => {
 
     const transactionMatchesRule = (transaction: Transaction, rule: TransactionRule): boolean => {
         return rule.conditions
-            .map(condition => new RegExp(condition.pattern, condition.flags).test(transaction[condition.property]))
+            .map(condition => new RegExp(condition.pattern, condition.flags).test(transaction[condition.property] === null ? '' : transaction[condition.property]))
             .every(condition => condition === true)
     }
 
@@ -72,7 +72,8 @@ export default async () => {
                                 transaction = undefined
                             }
                             if (rule.type === 'override' && transaction.hasOwnProperty(rule.property)) {
-                                transaction[rule.property] = (transaction[rule.property].toString() as String).replace(
+                                const transactionProperty = transaction[rule.property] === null ? '' : transaction[rule.property];
+                                transaction[rule.property] = (transactionProperty.toString() as String).replace(
                                     new RegExp(rule.findPattern, rule.flags),
                                     rule.replacePattern
                                 )

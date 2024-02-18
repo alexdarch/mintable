@@ -87,6 +87,7 @@ export default async () => {
             await google.saveAccessTokens(tokens)
 
             logInfo('Successfully set up Google Integration.')
+            // @ts-ignore
             return resolve()
         } catch (e) {
             logError('Unable to set up Plaid Integration.', e)

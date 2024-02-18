@@ -10,7 +10,9 @@
         "watch": "tsc --watch",
         "lint": "prettier --check ./src/**/*.js ./src/**/*.html ./src/**/*.ts ./docs/**/*.json",
         "lint-fix": "prettier --write ./src/**/*.js ./src/**/*.html ./src/**/*.ts ./docs/**/*.json",
-        "test": "npm run build && npm run lint"
+        "test": "npm run build && npm run lint",
+        "fetch": "ts-node ./src/scripts/cli.ts fetch --config-file ./mintable.jsonc --rules-file ./rules.jsonc",
+        "account-setup": "ts-node ./src/scripts/cli.ts account-setup --config-file ./mintable.jsonc"
     },
     "files": [
         "src",
@@ -40,12 +42,16 @@
         "open": "^7.0.2",
         "plaid": "^7.0.0",
         "prompts": "^2.3.1",
-        "typescript": "3.8.3",
+        "typescript": "^5.3.3",
         "typescript-json-schema": "^0.42.0",
         "yargs": "^15.1.0"
     },
     "devDependencies": {
-        "prettier": "^1.16.4"
+        "prettier": "^1.16.4",
+        "ts-node": "^10.9.2"
+    },
+    "engines": {
+        "node": ">=20.11.0"
     },
     "description": "Automate your personal finances – for free, with no ads, and no data collection.",
     "repository": {

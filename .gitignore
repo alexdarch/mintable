@@ -14,3 +14,6 @@ yarn-error.log
 yarn.lock
 .next
 */.next
+
+test.yaml
+rules.jsonc

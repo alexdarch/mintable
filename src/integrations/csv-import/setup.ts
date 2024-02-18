@@ -78,6 +78,7 @@ export default async () => {
             )
 
             logInfo('Successfully set up CSV Import Integration.')
+            // @ts-ignore
             return resolve()
         } catch (e) {
             logError('Unable to set up CSV Import Integration.', e)

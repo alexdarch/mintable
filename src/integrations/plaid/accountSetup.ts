@@ -22,6 +22,7 @@ export default async () => {
             await plaid.accountSetup()
 
             logInfo('Successfully set up Plaid Account(s).')
+            // @ts-ignore
             return resolve()
         } catch (e) {
             logError('Unable to set up Plaid Account(s).', e)

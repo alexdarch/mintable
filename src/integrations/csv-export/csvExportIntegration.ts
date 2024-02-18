@@ -29,10 +29,15 @@ export class CSVExportIntegration {
 
             const data = stringify(output, {
                 header: true,
+                delimiter: '\t', // Use tab as field separator
                 columns: this.config.transactions.properties
             })
 
-            writeFileSync(this.CSVExportConfig.transactionPath, data)
+            // Add BOM (Byte Order Mark) to indicate UTF-16 LE encoding (for excel)
+            const bom = Buffer.from([0xFF, 0xFE]);
+            const utf16leData = Buffer.concat([bom, Buffer.from(data, 'utf16le')]);
+
+            writeFileSync(this.CSVExportConfig.transactionPath, utf16leData)
 
             logInfo(
                 `Successfully exported ${transactions.length} transactions for integration ${IntegrationId.CSVExport}`

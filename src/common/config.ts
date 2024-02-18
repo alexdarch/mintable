@@ -13,6 +13,7 @@ import { jsonc } from 'jsonc'
 
 const DEFAULT_CONFIG_FILE = '~/mintable.jsonc'
 const DEFAULT_CONFIG_VAR = 'MINTABLE_CONFIG'
+const DEFAULT_RULES_VAR = 'MINTABLE_RULES'
 
 const DEFAULT_CONFIG: Config = {
     accounts: {},
@@ -62,6 +63,25 @@ export const getConfigSource = (): ConfigSource => {
     const path = DEFAULT_CONFIG_FILE.replace(/^~(?=$|\/|\\)/, os.homedir())
     logInfo(`Using default configuration file \`${path}.\``)
     logInfo(`You can supply either --config-file or --config-variable to specify a different configuration.`)
+    return { type: 'file', path: path }
+}
+
+export const getRulesSource = (): ConfigSource => {
+    if (argv['rules-file']) {
+        const path = argv['rules-file'].replace(/^~(?=$|\/|\\)/, os.homedir())
+        logInfo(`Using rules file \`${path}.\``)
+        return { type: 'file', path: path }
+    }
+
+    if (process.env[DEFAULT_RULES_VAR]) {
+        logInfo(`Using rules variable '${DEFAULT_RULES_VAR}.'`)
+        return { type: 'environment', variable: DEFAULT_RULES_VAR }
+    }
+
+    // Default to DEFAULT_CONFIG_FILE
+    const path = DEFAULT_RULES_VAR.replace(/^~(?=$|\/|\\)/, os.homedir())
+    logInfo(`Using default rules file \`${path}.\``)
+    logInfo(`You can supply either --rules-file or --rules-variable to specify a different configuration.`)
     return { type: 'file', path: path }
 }
 
@@ -161,10 +181,20 @@ export const validateConfig = (parsedConfig: Object): Config => {
 
 export const getConfig = (): Config => {
     const configSource = getConfigSource()
+    const rulesSource = getRulesSource()
     const configString = readConfig(configSource)
+    const rulesString = readConfig(rulesSource)
     const parsedConfig = parseConfig(configString)
+    const parsedRules = parseConfig(rulesString)
+
     const validatedConfig = validateConfig(parsedConfig)
-    return validatedConfig
+    const transactions = validatedConfig.transactions 
+
+    const transactionsConfig = { ...transactions, ...parsedRules }
+    validatedConfig.transactions = transactionsConfig;
+
+    const validatedConfig2 = validateConfig(validatedConfig)
+    return validatedConfig2
 }
 
 export const writeConfig = (source: ConfigSource, config: Config): void => {

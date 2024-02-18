@@ -14,6 +14,7 @@ import { logError } from '../common/logging'
 ;(async function() {
     const logo = [
         '\n',
+        ' Running in development s',
         '          %',
         '          %%',
         '         %%%%%',
