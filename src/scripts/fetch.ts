@@ -101,7 +101,7 @@ export default async () => {
 
         accounts = accounts.map(account => {
             let overriddenAccount = account
-            for (const rule of config.balances.rules) {
+            config.balances.rules.forEach(rule => {
                 if (overriddenAccount && matchesRule(overriddenAccount, rule)) {
                     if (rule.type === 'filter') {
                         logInfo(`Rule type 'filter' is not allowed for balances. ${rule}`)
@@ -116,7 +116,7 @@ export default async () => {
                         countOverridden += 1
                     }
                 }
-            }
+            })
             return overriddenAccount
         })
         logInfo(`${countOverridden} out of ${accounts.length} total balances/accounts overridden.`)
