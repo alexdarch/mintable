@@ -64,7 +64,9 @@ export class CSVImportIntegration {
                                     // Remove spaces/special characters from amount field
                                     if (outputRow.hasOwnProperty('amount')) {
                                         const pattern = new RegExp(`[^0-9\.\-]*`, 'gi')
-                                        outputRow['amount'] = parseFloat(outputRow['amount'].toString().replace(pattern, ''))
+                                        outputRow['amount'] = parseFloat(
+                                            outputRow['amount'].toString().replace(pattern, '')
+                                        )
                                     }
 
                                     // Parse dates

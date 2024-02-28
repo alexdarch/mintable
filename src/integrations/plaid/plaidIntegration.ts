@@ -209,12 +209,11 @@ export class PlaidIntegration {
             logWarn('Transaction history older than 6 months may not be available for some institutions.', {})
         }
 
-        console.log("config", accountConfig)
+        console.log('config', accountConfig)
 
         return this.fetchPagedTransactions(accountConfig, startDate, endDate)
             .then(data => {
                 // console.log("fetching account", data.accounts)
-
 
                 let accounts: Account[] = data.accounts.map(account => ({
                     integration: IntegrationId.Plaid,
@@ -239,7 +238,7 @@ export class PlaidIntegration {
                     accountId: transaction.account_id,
                     transactionId: transaction.transaction_id,
                     pendingtransactionId: transaction.pending_transaction_id,
-                    category: transaction.category ? transaction.category.join(' - ') : "Uncategorized",
+                    category: transaction.category ? transaction.category.join(' - ') : 'Uncategorized',
                     address: transaction.location.address,
                     city: transaction.location.city,
                     state: transaction.location.region,
@@ -268,7 +267,7 @@ export class PlaidIntegration {
                 return accounts
             })
             .catch(error => {
-                console.log("error: ", error, accountConfig)
+                console.log('error: ', error, accountConfig)
                 logError(`Error fetching account ${accountConfig.id}.`, error)
                 return []
             })

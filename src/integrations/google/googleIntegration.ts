@@ -46,12 +46,12 @@ export class GoogleIntegration {
             email: this.googleConfig.credentials.client_email,
             key: this.googleConfig.credentials.private_key,
             scopes: ['https://www.googleapis.com/auth/spreadsheets']
-        });
+        })
 
         this.sheets = google.sheets({
             version: 'v4',
             auth: jwtClient
-        }).spreadsheets;
+        }).spreadsheets
 
         this.sheets = google.sheets({
             version: 'v4',
@@ -62,7 +62,7 @@ export class GoogleIntegration {
     public getAuthURL = (): string => {
         // For service accounts, there's no need for user authentication,
         // so you won't be generating an auth URL.
-        throw new Error('No authentication URL needed for service accounts');
+        throw new Error('No authentication URL needed for service accounts')
 
         // this.client.generateAuthUrl({
         //     scope: this.googleConfig.credentials.scope
@@ -74,14 +74,14 @@ export class GoogleIntegration {
         // through user interaction. You directly use the service account's
         // private key to authenticate.
 
-        throw new Error('No access tokens needed for service accounts');
+        throw new Error('No access tokens needed for service accounts')
         // this.client.getToken(authCode).then(response => response.tokens)
     }
 
     public saveAccessTokens = (tokens: Credentials): void => {
         // For service accounts, there's no concept of saving access tokens,
         // as they use private keys directly and don't have refresh tokens.
-        throw new Error('No access tokens to save for service accounts');
+        throw new Error('No access tokens to save for service accounts')
 
         // updateConfig(config => {
         //     let googleConfig = config.integrations[IntegrationId.Google] as GoogleConfig

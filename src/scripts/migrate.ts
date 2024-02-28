@@ -15,14 +15,12 @@ export const getOldConfig = (): ConfigSource => {
 }
 
 export default () => {
-    throw new Error("Migration not applicable for this application")
+    throw new Error('Migration not applicable for this application')
     try {
         // const oldConfigSource = getOldConfig()
         // const oldConfigString = readConfig(oldConfigSource)
         // let oldConfig = parseConfig(oldConfigString)
-
         // const deprecatedProperties = ['HOST', 'PORT', 'CATEGORY_OVERRIDES', 'DEBUG', 'CREATE_BALANCES_SHEET', 'DEBUG']
-
         // deprecatedProperties.forEach(prop => {
         //     if (oldConfig.hasOwnProperty(prop)) {
         //         logWarn(`Config property '${prop}' is deprecated and will not be migrated.`)
@@ -31,7 +29,6 @@ export default () => {
         //         }
         //     }
         // })
-
         // // Update to new Account syntax
         // const balanceColumns: string[] = oldConfig['BALANCE_COLUMNS'].map(col => {
         //     switch (col) {
@@ -49,7 +46,6 @@ export default () => {
         //             return col
         //     }
         // })
-
         // // Update to new Transaction syntax
         // const transactionColumns: string[] = oldConfig['TRANSACTION_COLUMNS'].map(col => {
         //     switch (col) {
@@ -60,7 +56,6 @@ export default () => {
         //             return col
         //     }
         // })
-
         // const accounts: { [id: string]: AccountConfig } = {}
         // Object.keys(oldConfig).map(key => {
         //     if (key.includes('PLAID_TOKEN')) {
@@ -72,16 +67,13 @@ export default () => {
         //         accounts[account.id] = account
         //     }
         // })
-
         // const newConfigSource = getConfigSource()
         // writeConfig(newConfigSource, {
         //     integrations: {
         //         google: {
         //             id: IntegrationId.Google,
         //             type: IntegrationType.Export,
-
         //             name: 'Google Sheets',
-
         //             credentials: {
         //                 clientId: oldConfig['SHEETS_CLIENT_ID'],
         //                 clientSecret: oldConfig['SHEETS_CLIENT_SECRET'],
@@ -93,7 +85,6 @@ export default () => {
         //                 expiryDate: parseInt(oldConfig['SHEETS_EXPIRY_DATE'])
         //             },
         //             documentId: oldConfig['SHEETS_SHEET_ID'],
-
         //             template: {
         //                 documentId: oldConfig['TEMPLATE_SHEET']['SHEET_ID'],
         //                 sheetTitle: oldConfig['TEMPLATE_SHEET']['SHEET_TITLE']
@@ -102,9 +93,7 @@ export default () => {
         //         plaid: {
         //             id: IntegrationId.Plaid,
         //             type: IntegrationType.Import,
-
         //             name: 'Plaid',
-
         //             environment: oldConfig['PLAID_ENVIRONMENT'],
         //             credentials: {
         //                 clientId: oldConfig['PLAID_CLIENT_ID'],

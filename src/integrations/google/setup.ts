@@ -8,16 +8,19 @@ import { logInfo, logError } from '../../common/logging'
 
 export default async () => {
     return new Promise(async (resolve, reject) => {
-
-        throw new Error("Not implemented for service accounts");
+        throw new Error('Not implemented for service accounts')
 
         try {
             console.log(
                 '\nThis script will walk you through setting up the Google Sheets integration. Follow these steps:'
             )
             console.log('\n\t1. Create a new Google Sheet (https://sheets.new)')
-            console.log('\t2. Follow the guide here: https://developers.google.com/workspace/guides/create-credentials#desktop-app')
-            console.log(`\t3. Make sure your app's Publishing Status is 'Testing', and add your Gmail account you wish to use as a Test User here: https://console.cloud.google.com/apis/credentials/consent`)
+            console.log(
+                '\t2. Follow the guide here: https://developers.google.com/workspace/guides/create-credentials#desktop-app'
+            )
+            console.log(
+                `\t3. Make sure your app's Publishing Status is 'Testing', and add your Gmail account you wish to use as a Test User here: https://console.cloud.google.com/apis/credentials/consent`
+            )
             console.log('\t4. Answer the following questions:\n')
 
             // const oauthCredentials = await prompts([
@@ -51,7 +54,6 @@ export default async () => {
             // ])
 
             updateConfig(config => {
-
                 let googleConfig = (config.integrations[IntegrationId.Google] as GoogleConfig) || defaultGoogleConfig
 
                 // googleConfig.name = credentials.name

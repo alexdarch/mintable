@@ -34,8 +34,8 @@ export class CSVExportIntegration {
             })
 
             // Add BOM (Byte Order Mark) to indicate UTF-16 LE encoding (for excel)
-            const bom = Buffer.from([0xFF, 0xFE]);
-            const utf16leData = Buffer.concat([bom, Buffer.from(data, 'utf16le')]);
+            const bom = Buffer.from([0xff, 0xfe])
+            const utf16leData = Buffer.concat([bom, Buffer.from(data, 'utf16le')])
 
             writeFileSync(this.CSVExportConfig.transactionPath, utf16leData)
 

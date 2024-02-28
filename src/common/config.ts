@@ -186,15 +186,15 @@ export const getConfig = (): Config => {
     const configString = readConfig(configSource)
     const rulesString = readConfig(rulesSource)
     const parsedConfig = parseConfig(configString)
-    const parsedRules = parseConfig(rulesString) as { transactionRules: Rule[]; balanceRules: Rule[]; }
+    const parsedRules = parseConfig(rulesString) as { transactionRules: Rule[]; balanceRules: Rule[] }
 
     const validatedConfig = validateConfig(parsedConfig)
 
     const transactionsConfig = { ...validatedConfig.transactions, rules: parsedRules.transactionRules }
-    validatedConfig.transactions = transactionsConfig;
+    validatedConfig.transactions = transactionsConfig
 
     const balancesConfig = { ...validatedConfig.balances, rules: parsedRules.balanceRules }
-    validatedConfig.balances = balancesConfig;
+    validatedConfig.balances = balancesConfig
 
     const validatedConfig2 = validateConfig(validatedConfig)
     return validatedConfig2

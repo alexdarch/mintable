@@ -55,7 +55,11 @@ export default async () => {
 
     const matchesRule = (item: Transaction | Account, rule: Rule): boolean => {
         return rule.conditions
-            .map(condition => new RegExp(condition.pattern, condition.flags).test(item[condition.property] === null ? '' : item[condition.property]))
+            .map(condition =>
+                new RegExp(condition.pattern, condition.flags).test(
+                    item[condition.property] === null ? '' : item[condition.property]
+                )
+            )
             .every(condition => condition === true)
     }
 
@@ -72,7 +76,8 @@ export default async () => {
                                 transaction = undefined
                             }
                             if (rule.type === 'override' && transaction.hasOwnProperty(rule.property)) {
-                                const transactionProperty = transaction[rule.property] === null ? '' : transaction[rule.property];
+                                const transactionProperty =
+                                    transaction[rule.property] === null ? '' : transaction[rule.property]
                                 transaction[rule.property] = (transactionProperty.toString() as String).replace(
                                     new RegExp(rule.findPattern, rule.flags),
                                     rule.replacePattern
@@ -95,14 +100,15 @@ export default async () => {
         let countOverridden = 0
 
         accounts = accounts.map(account => {
-            let overriddenAccount = account;
+            let overriddenAccount = account
             for (const rule of config.balances.rules) {
                 if (overriddenAccount && matchesRule(overriddenAccount, rule)) {
                     if (rule.type === 'filter') {
                         logInfo(`Rule type 'filter' is not allowed for balances. ${rule}`)
                     }
                     if (rule.type === 'override' && overriddenAccount.hasOwnProperty(rule.property)) {
-                        const property = overriddenAccount[rule.property] === null ? '' : overriddenAccount[rule.property];
+                        const property =
+                            overriddenAccount[rule.property] === null ? '' : overriddenAccount[rule.property]
                         overriddenAccount[rule.property] = (property.toString() as String).replace(
                             new RegExp(rule.findPattern, rule.flags),
                             rule.replacePattern
