@@ -8,6 +8,9 @@ import { logInfo, logError } from '../../common/logging'
 
 export default async () => {
     return new Promise(async (resolve, reject) => {
+
+        throw new Error("Not implemented for service accounts");
+
         try {
             console.log(
                 '\nThis script will walk you through setting up the Google Sheets integration. Follow these steps:'
@@ -17,48 +20,49 @@ export default async () => {
             console.log(`\t3. Make sure your app's Publishing Status is 'Testing', and add your Gmail account you wish to use as a Test User here: https://console.cloud.google.com/apis/credentials/consent`)
             console.log('\t4. Answer the following questions:\n')
 
-            const credentials = await prompts([
-                {
-                    type: 'text',
-                    name: 'name',
-                    message: 'What would you like to call this integration?',
-                    initial: 'Google Sheets',
-                    validate: (s: string) =>
-                        0 < s.length && s.length <= 64 ? true : 'Must be between 0 and 64 characters in length.'
-                },
-                {
-                    type: 'password',
-                    name: 'clientId',
-                    message: 'Client ID',
-                    validate: (s: string) => (s.length >= 8 ? true : 'Must be at least 8 characters in length.')
-                },
-                {
-                    type: 'password',
-                    name: 'clientSecret',
-                    message: 'Client Secret',
-                    validate: (s: string) => (s.length >= 8 ? true : 'Must be at least 8 characters in length.')
-                },
-                {
-                    type: 'text',
-                    name: 'documentId',
-                    message:
-                        'Document ID (From the sheet you just created: https://docs.google.com/spreadsheets/d/DOCUMENT_ID/edit)',
-                    validate: (s: string) => (s.length >= 8 ? true : 'Must be at least 8 characters in length.')
-                }
-            ])
+            // const oauthCredentials = await prompts([
+            //     {
+            //         type: 'text',
+            //         name: 'name',
+            //         message: 'What would you like to call this integration?',
+            //         initial: 'Google Sheets',
+            //         validate: (s: string) =>
+            //             0 < s.length && s.length <= 64 ? true : 'Must be between 0 and 64 characters in length.'
+            //     },
+            //     {
+            //         type: 'password',
+            //         name: 'clientId',
+            //         message: 'Client ID',
+            //         validate: (s: string) => (s.length >= 8 ? true : 'Must be at least 8 characters in length.')
+            //     },
+            //     {
+            //         type: 'password',
+            //         name: 'clientSecret',
+            //         message: 'Client Secret',
+            //         validate: (s: string) => (s.length >= 8 ? true : 'Must be at least 8 characters in length.')
+            //     },
+            //     {
+            //         type: 'text',
+            //         name: 'documentId',
+            //         message:
+            //             'Document ID (From the sheet you just created: https://docs.google.com/spreadsheets/d/DOCUMENT_ID/edit)',
+            //         validate: (s: string) => (s.length >= 8 ? true : 'Must be at least 8 characters in length.')
+            //     }
+            // ])
 
             updateConfig(config => {
+
                 let googleConfig = (config.integrations[IntegrationId.Google] as GoogleConfig) || defaultGoogleConfig
 
-                googleConfig.name = credentials.name
-                googleConfig.documentId = credentials.documentId
-                googleConfig.credentials.clientId = credentials.clientId
-                googleConfig.credentials.clientSecret = credentials.clientSecret
+                // googleConfig.name = credentials.name
+                // googleConfig.documentId = credentials.documentId
+                // googleConfig.credentials.clientId = credentials.clientId
+                // googleConfig.credentials.clientSecret = credentials.clientSecret
 
-                config.integrations[IntegrationId.Google] = googleConfig
+                // config.integrations[IntegrationId.Google] = googleConfig
 
-                config.transactions.integration = IntegrationId.Google
-                config.balances.integration = IntegrationId.Google
+                // config.transactions.integration = IntegrationId.Google
+                // config.balances.integration = IntegrationId.Google
 
                 return config
             })

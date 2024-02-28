@@ -7,7 +7,8 @@ import { IntegrationId } from '../types/integrations'
 import { parseISO, subMonths, startOfMonth } from 'date-fns'
 import { CSVImportIntegration } from '../integrations/csv-import/csvImportIntegration'
 import { CSVExportIntegration } from '../integrations/csv-export/csvExportIntegration'
-import { Transaction, TransactionRuleCondition, TransactionRule } from '../types/transaction'
+import { Transaction } from '../types/transaction'
+import { Rule, RuleCondition } from '../types/rule'
 
 export default async () => {
     const config = getConfig()
@@ -52,13 +53,12 @@ export default async () => {
 
     const totalTransactions = numTransactions()
 
-    const transactionMatchesRule = (transaction: Transaction, rule: TransactionRule): boolean => {
+    const matchesRule = (item: Transaction | Account, rule: Rule): boolean => {
         return rule.conditions
-            .map(condition => new RegExp(condition.pattern, condition.flags).test(transaction[condition.property] === null ? '' : transaction[condition.property]))
+            .map(condition => new RegExp(condition.pattern, condition.flags).test(item[condition.property] === null ? '' : item[condition.property]))
             .every(condition => condition === true)
     }
 
-    // Transaction Rules
     if (config.transactions.rules) {
         let countOverridden = 0
 
@@ -67,7 +67,7 @@ export default async () => {
             transactions: account.transactions
                 .map(transaction => {
                     config.transactions.rules.forEach(rule => {
-                        if (transaction && transactionMatchesRule(transaction, rule)) {
+                        if (transaction && matchesRule(transaction, rule)) {
                             if (rule.type === 'filter') {
                                 transaction = undefined
                             }
@@ -89,6 +89,31 @@ export default async () => {
 
         logInfo(`${numTransactions()} transactions out of ${totalTransactions} total transactions matched filters.`)
         logInfo(`${countOverridden} out of ${totalTransactions} total transactions overridden.`)
+    }
+
+    if (config.balances.rules) {
+        let countOverridden = 0
+
+        accounts = accounts.map(account => {
+            let overriddenAccount = account;
+            for (const rule of config.balances.rules) {
+                if (overriddenAccount && matchesRule(overriddenAccount, rule)) {
+                    if (rule.type === 'filter') {
+                        logInfo(`Rule type 'filter' is not allowed for balances. ${rule}`)
+                    }
+                    if (rule.type === 'override' && overriddenAccount.hasOwnProperty(rule.property)) {
+                        const property = overriddenAccount[rule.property] === null ? '' : overriddenAccount[rule.property];
+                        overriddenAccount[rule.property] = (property.toString() as String).replace(
+                            new RegExp(rule.findPattern, rule.flags),
+                            rule.replacePattern
+                        )
+                        countOverridden += 1
+                    }
+                }
+            }
+            return overriddenAccount
+        })
+        logInfo(`${countOverridden} out of ${accounts.length} total balances/accounts overridden.`)
     }
 
     switch (config.balances.integration) {

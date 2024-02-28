@@ -147,15 +147,17 @@ These templates can be added into the `accounts` section of your `mintable.jsonc
 
 ### In the cloud – via [Google Sheets](https://www.google.com/sheets/about/)
 
-You can run:
+The following is now deprecated:
 
 ```bash
 mintable google-setup
 ```
 
-to enter the Google Sheets setup wizard. This will allow you to automatically update a sheet with your transactions/account balances every time `mintable fetch` is run.
+This version of mintable uses a service account to connect to google sheets to avoid the 2 week expiry date on the sheets refresh tokens. To setup a service account:
 
-> **Note:** Google Sheets is the default export integration and this step is not necessary if you've already run `mintable setup`.
+1. Create a service account https://developers.google.com/workspace/guides/create-credentials#desktop-app
+2. Download the credentials json when created. Note you will only get one shot at this.
+3. Share your sheet with the email of your new service account
 
 ### On your local machine – via CSV files
 
@@ -180,43 +182,6 @@ mintable fetch
 ```
 
 to automate updates to your spreadsheet.
-
-### Automatically – in your Mac's Menu Bar – via [BitBar](https://github.com/matryer/bitbar#get-started)
-
-You can put Mintable in your Mac's menu bar, and have it run automatically every hour using our [BitBar Plugin](https://github.com/matryer/bitbar-plugins/pull/1460).
-
-![BitBar](./img/bitbar.png)
-
-1. [Install BitBar](https://github.com/matryer/bitbar/releases) on your Mac.
-2. Set your plugin folder.
-3. Create a new file in `mintable.1h.zsh` in your plugin folder.
-4. Copy & paste [this](https://github.com/matryer/bitbar-plugins/blob/39e8f252ed69d0dd46bbe095299e52279e86d737/Finance/mintable.1h.zsh) into the file you just created and save.
-5. Open **BitBar** > **Preferences** > **Refresh All** to update your spreadsheet.
-
-> **Note:** The plugin above is pending approval and this install process should be much easier moving forward.
-
-### Automatically – in your local machine's terminal – via `cron`
-
-You can run Mintable automatically within your terminal using `cron`:
-
-![`cron`](./img/cron.png)
-
-```bash
-echo "0 * * * * export PATH="/usr/local/bin:$PATH" && mintable fetch" > ~/mintable.cron
-crontab ~/mintable.cron
-```
-
-The first step creates a new file `~/mintable.cron` which contains an interval and the command you want to run. The second step registers that file with `crontab`, the command-line executable which actually schedules the job with your operating system.
-
-The default refresh interval is 1 hour – you can use [Crontab Guru](https://crontab.guru/) to define your own interval.
-
-You can remove this schedule by running:
-
-```bash
-crontab -r
-```
-
-> **Note:** The instructions above assume your global `mintable` CLI lives in `/usr/local/bin`, but if your installation path is different (run `which mintable`) you should use that instead.
 
 ### Automatically – in the cloud – via GitHub Actions
 

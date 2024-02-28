@@ -2,7 +2,7 @@ import { google, sheets_v4 } from 'googleapis'
 import { Config, updateConfig } from '../../common/config'
 import { IntegrationId } from '../../types/integrations'
 import { GoogleConfig } from '../../types/integrations/google'
-import { OAuth2Client, Credentials } from 'google-auth-library'
+import { OAuth2Client, Credentials, JWT } from 'google-auth-library'
 import { logInfo, logError } from '../../common/logging'
 import { Account } from '../../types/account'
 import { sortBy, groupBy } from 'lodash'
@@ -22,53 +22,79 @@ export interface DataRange {
 export class GoogleIntegration {
     config: Config
     googleConfig: GoogleConfig
-    client: OAuth2Client
+    // client: OAuth2Client
     sheets: sheets_v4.Resource$Spreadsheets
 
     constructor(config: Config) {
         this.config = config
         this.googleConfig = config.integrations[IntegrationId.Google] as GoogleConfig
 
-        this.client = new google.auth.OAuth2(
-            this.googleConfig.credentials.clientId,
-            this.googleConfig.credentials.clientSecret,
-            this.googleConfig.credentials.redirectUri
-        )
+        // this.client = new google.auth.OAuth2(
+        //     this.googleConfig.credentials.clientId,
+        //     this.googleConfig.credentials.clientSecret,
+        //     this.googleConfig.credentials.redirectUri
+        // )
 
-        this.client.setCredentials({
-            access_token: this.googleConfig.credentials.accessToken,
-            refresh_token: this.googleConfig.credentials.refreshToken,
-            token_type: this.googleConfig.credentials.tokenType,
-            expiry_date: this.googleConfig.credentials.expiryDate
-        })
+        // this.client.setCredentials({
+        //     access_token: this.googleConfig.credentials.accessToken,
+        //     refresh_token: this.googleConfig.credentials.refreshToken,
+        //     token_type: this.googleConfig.credentials.tokenType,
+        //     expiry_date: this.googleConfig.credentials.expiryDate
+        // })
+
+        const jwtClient = new JWT({
+            email: this.googleConfig.credentials.client_email,
+            key: this.googleConfig.credentials.private_key,
+            scopes: ['https://www.googleapis.com/auth/spreadsheets']
+        });
 
         this.sheets = google.sheets({
             version: 'v4',
-            auth: this.client
+            auth: jwtClient
+        }).spreadsheets;
+
+        this.sheets = google.sheets({
+            version: 'v4',
+            auth: jwtClient
         }).spreadsheets
     }
 
-    public getAuthURL = (): string =>
-        this.client.generateAuthUrl({
-            scope: this.googleConfig.credentials.scope
-        })
+    public getAuthURL = (): string => {
+        // For service accounts, there's no need for user authentication,
+        // so you won't be generating an auth URL.
+        throw new Error('No authentication URL needed for service accounts');
 
-    public getAccessTokens = (authCode: string): Promise<Credentials> =>
-        this.client.getToken(authCode).then(response => response.tokens)
+        // this.client.generateAuthUrl({
+        //     scope: this.googleConfig.credentials.scope
+        // })
+    }
+
+    public getAccessTokens = (authCode: string): Promise<Credentials> => {
+        // For service accounts, there's no concept of getting access tokens
+        // through user interaction. You directly use the service account's
+        // private key to authenticate.
+
+        throw new Error('No access tokens needed for service accounts');
+        // this.client.getToken(authCode).then(response => response.tokens)
+    }
 
     public saveAccessTokens = (tokens: Credentials): void => {
-        updateConfig(config => {
-            let googleConfig = config.integrations[IntegrationId.Google] as GoogleConfig
+        // For service accounts, there's no concept of saving access tokens,
+        // as they use private keys directly and don't have refresh tokens.
+        throw new Error('No access tokens to save for service accounts');
 
-            googleConfig.credentials.accessToken = tokens.access_token
-            googleConfig.credentials.refreshToken = tokens.refresh_token
-            googleConfig.credentials.tokenType = tokens.token_type
-            googleConfig.credentials.expiryDate = tokens.expiry_date
+        // updateConfig(config => {
+        //     let googleConfig = config.integrations[IntegrationId.Google] as GoogleConfig
 
-            config.integrations[IntegrationId.Google] = googleConfig
+        //     googleConfig.credentials.accessToken = tokens.access_token
+        //     googleConfig.credentials.refreshToken = tokens.refresh_token
+        //     googleConfig.credentials.tokenType = tokens.token_type
+        //     googleConfig.credentials.expiryDate = tokens.expiry_date
 
-            return config
-        })
+        //     config.integrations[IntegrationId.Google] = googleConfig
+
+        //     return config
+        // })
     }
 
     public getSheets = (documentId?: string): Promise<sheets_v4.Schema$Sheet[]> => {

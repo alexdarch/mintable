@@ -1,6 +1,7 @@
 import { IntegrationConfig, IntegrationId } from '../types/integrations'
 import { AccountConfig } from '../types/account'
 import { TransactionConfig } from '../types/transaction'
+import { Rule } from '../types/rule'
 import { logInfo, logError } from './logging'
 import { argv } from 'yargs'
 import * as fs from 'fs'
@@ -185,13 +186,15 @@ export const getConfig = (): Config => {
     const configString = readConfig(configSource)
     const rulesString = readConfig(rulesSource)
     const parsedConfig = parseConfig(configString)
-    const parsedRules = parseConfig(rulesString)
+    const parsedRules = parseConfig(rulesString) as { transactionRules: Rule[]; balanceRules: Rule[]; }
 
     const validatedConfig = validateConfig(parsedConfig)
-    const transactions = validatedConfig.transactions 
 
-    const transactionsConfig = { ...transactions, ...parsedRules }
+    const transactionsConfig = { ...validatedConfig.transactions, rules: parsedRules.transactionRules }
     validatedConfig.transactions = transactionsConfig;
+
+    const balancesConfig = { ...validatedConfig.balances, rules: parsedRules.balanceRules }
+    validatedConfig.balances = balancesConfig;
 
     const validatedConfig2 = validateConfig(validatedConfig)
     return validatedConfig2
