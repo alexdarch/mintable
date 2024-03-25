@@ -23,24 +23,11 @@ export class GoogleIntegration {
     config: Config
     googleConfig: GoogleConfig
     // client: OAuth2Client
-    sheets: sheets_v4.Resource$Spreadsheets
+    spreadsheets: sheets_v4.Resource$Spreadsheets
 
     constructor(config: Config) {
         this.config = config
         this.googleConfig = config.integrations[IntegrationId.Google] as GoogleConfig
-
-        // this.client = new google.auth.OAuth2(
-        //     this.googleConfig.credentials.clientId,
-        //     this.googleConfig.credentials.clientSecret,
-        //     this.googleConfig.credentials.redirectUri
-        // )
-
-        // this.client.setCredentials({
-        //     access_token: this.googleConfig.credentials.accessToken,
-        //     refresh_token: this.googleConfig.credentials.refreshToken,
-        //     token_type: this.googleConfig.credentials.tokenType,
-        //     expiry_date: this.googleConfig.credentials.expiryDate
-        // })
 
         const jwtClient = new JWT({
             email: this.googleConfig.credentials.client_email,
@@ -48,57 +35,14 @@ export class GoogleIntegration {
             scopes: ['https://www.googleapis.com/auth/spreadsheets']
         })
 
-        this.sheets = google.sheets({
-            version: 'v4',
-            auth: jwtClient
-        }).spreadsheets
-
-        this.sheets = google.sheets({
+        this.spreadsheets = google.sheets({
             version: 'v4',
             auth: jwtClient
         }).spreadsheets
     }
 
-    public getAuthURL = (): string => {
-        // For service accounts, there's no need for user authentication,
-        // so you won't be generating an auth URL.
-        throw new Error('No authentication URL needed for service accounts')
-
-        // this.client.generateAuthUrl({
-        //     scope: this.googleConfig.credentials.scope
-        // })
-    }
-
-    public getAccessTokens = (authCode: string): Promise<Credentials> => {
-        // For service accounts, there's no concept of getting access tokens
-        // through user interaction. You directly use the service account's
-        // private key to authenticate.
-
-        throw new Error('No access tokens needed for service accounts')
-        // this.client.getToken(authCode).then(response => response.tokens)
-    }
-
-    public saveAccessTokens = (tokens: Credentials): void => {
-        // For service accounts, there's no concept of saving access tokens,
-        // as they use private keys directly and don't have refresh tokens.
-        throw new Error('No access tokens to save for service accounts')
-
-        // updateConfig(config => {
-        //     let googleConfig = config.integrations[IntegrationId.Google] as GoogleConfig
-
-        //     googleConfig.credentials.accessToken = tokens.access_token
-        //     googleConfig.credentials.refreshToken = tokens.refresh_token
-        //     googleConfig.credentials.tokenType = tokens.token_type
-        //     googleConfig.credentials.expiryDate = tokens.expiry_date
-
-        //     config.integrations[IntegrationId.Google] = googleConfig
-
-        //     return config
-        // })
-    }
-
-    public getSheets = (documentId?: string): Promise<sheets_v4.Schema$Sheet[]> => {
-        return this.sheets
+    public getSheets = async (documentId?: string): Promise<{'udf': sheets_v4.Schema$Sheet[], 'generated': sheets_v4.Schema$Sheet[]}> => {
+        const allSheets = await this.spreadsheets
             .get({ spreadsheetId: documentId || this.googleConfig.documentId })
             .then(res => {
                 logInfo(`Fetched ${res.data.sheets.length} sheets.`, res.data.sheets)
@@ -108,19 +52,24 @@ export class GoogleIntegration {
                 logError(`Error fetching sheets for spreadsheet ${this.googleConfig.documentId}.`, error)
                 return []
             })
+
+        const transactionName = /\b\d{4}\.\d{2}\b/
+        const generated = allSheets.filter((sheet) => transactionName.exec(sheet.properties.title) || sheet.properties.title === 'Balances')
+        const udf = allSheets.filter((sheet) => !transactionName.exec(sheet.properties.title) && sheet.properties.title !== 'Balances')
+        return { 'udf': udf, 'generated': generated }
     }
 
     public copySheet = async (title: string, sourceDocumentId?: string): Promise<sheets_v4.Schema$SheetProperties> => {
         const sheets = await this.getSheets(sourceDocumentId || this.googleConfig.documentId)
-        let sourceSheetId
+        let sourceSheetId;
 
         try {
-            sourceSheetId = sheets.find(sheet => sheet.properties.title === title).properties.sheetId
+            sourceSheetId = sheets.generated.find(sheet => sheet.properties.title === title).properties.sheetId
         } catch (error) {
             logError(`Error finding template sheet ${title} in document ${sourceDocumentId}.`, { error, sheets })
         }
 
-        return this.sheets.sheets
+        return this.spreadsheets.sheets
             .copyTo({
                 spreadsheetId: sourceDocumentId || this.googleConfig.documentId,
                 sheetId: sourceSheetId,
@@ -137,7 +86,7 @@ export class GoogleIntegration {
     }
 
     public addSheet = (title: string): Promise<sheets_v4.Schema$SheetProperties> => {
-        return this.sheets
+        return this.spreadsheets
             .batchUpdate({
                 spreadsheetId: this.googleConfig.documentId,
                 requestBody: { requests: [{ addSheet: { properties: { title } } }] }
@@ -154,9 +103,9 @@ export class GoogleIntegration {
 
     public renameSheet = async (oldTitle: string, newTitle: string): Promise<sheets_v4.Schema$Response[]> => {
         const sheets = await this.getSheets()
-        const sheetId = sheets.find(sheet => sheet.properties.title === oldTitle).properties.sheetId
+        const sheetId = sheets.generated.find(sheet => sheet.properties.title === oldTitle).properties.sheetId
 
-        return this.sheets
+        return this.spreadsheets
             .batchUpdate({
                 spreadsheetId: this.googleConfig.documentId,
                 requestBody: {
@@ -187,7 +136,7 @@ export class GoogleIntegration {
 
     public clearRanges = (ranges: Range[]): Promise<sheets_v4.Schema$BatchClearValuesResponse> => {
         const translatedRanges = this.translateRanges(ranges)
-        return this.sheets.values
+        return this.spreadsheets.values
             .batchClear({
                 spreadsheetId: this.googleConfig.documentId,
                 requestBody: { ranges: translatedRanges }
@@ -207,7 +156,7 @@ export class GoogleIntegration {
             range: this.translateRange(dataRange.range),
             values: dataRange.data
         }))
-        return this.sheets.values
+        return this.spreadsheets.values
             .batchUpdate({
                 spreadsheetId: this.googleConfig.documentId,
                 requestBody: {
@@ -227,9 +176,9 @@ export class GoogleIntegration {
 
     public sortSheets = async (): Promise<sheets_v4.Schema$BatchUpdateSpreadsheetResponse> => {
         const sheets = await this.getSheets()
-        const ordered = sortBy(sheets, sheet => sheet.properties.title).reverse()
+        const ordered = sheets.udf.concat(sortBy(sheets.generated, sheet => sheet.properties.title).reverse())
 
-        return this.sheets
+        return this.spreadsheets
             .batchUpdate({
                 spreadsheetId: this.googleConfig.documentId,
                 requestBody: {
@@ -242,11 +191,11 @@ export class GoogleIntegration {
                 }
             })
             .then(res => {
-                logInfo(`Updated indices for ${sheets.length} sheets.`, res.data)
+                logInfo(`Updated indices for ${sheets.generated.length} sheets.`, res.data)
                 return res.data
             })
             .catch(error => {
-                logError(`Error updating indices for ${sheets.length} sheets.`, error)
+                logError(`Error updating indices for ${sheets.generated.length} sheets.`, error)
                 return {}
             })
     }
@@ -254,11 +203,11 @@ export class GoogleIntegration {
     public formatSheets = async (): Promise<sheets_v4.Schema$BatchUpdateSpreadsheetResponse> => {
         const sheets = await this.getSheets()
 
-        return this.sheets
+        return this.spreadsheets
             .batchUpdate({
                 spreadsheetId: this.googleConfig.documentId,
                 requestBody: {
-                    requests: sheets
+                    requests: sheets.generated
                         .map(sheet => [
                             {
                                 repeatCell: {
@@ -300,11 +249,11 @@ export class GoogleIntegration {
                 }
             })
             .then(res => {
-                logInfo(`Updated formatting for ${sheets.length} sheets.`, res.data)
+                logInfo(`Updated formatting for ${sheets.generated.length} sheets.`, res.data)
                 return res.data
             })
             .catch(error => {
-                logError(`Error updating formatting for ${sheets.length} sheets.`, error)
+                logError(`Error updating formatting for ${sheets.generated.length} sheets.`, error)
                 return {}
             })
     }
@@ -328,7 +277,7 @@ export class GoogleIntegration {
         useTemplate?: boolean
     ): Promise<sheets_v4.Schema$BatchUpdateValuesResponse> => {
         const sheets = await this.getSheets()
-        const existing = sheets.find(sheet => sheet.properties.title === sheetTitle)
+        const existing = sheets.generated.find(sheet => sheet.properties.title === sheetTitle)
 
         if (existing === undefined) {
             if (this.googleConfig.template && useTemplate === true) {
@@ -396,5 +345,24 @@ export class GoogleIntegration {
 
         logInfo('You can view your sheet here:\n')
         console.log(`https://docs.google.com/spreadsheets/d/${this.googleConfig.documentId}`)
+    }
+
+    public getAuthURL = (): string => {
+        // For service accounts, there's no need for user authentication,
+        // so you won't be generating an auth URL.
+        throw new Error('No authentication URL needed for service accounts')
+    }
+
+    public getAccessTokens = (authCode: string): Promise<Credentials> => {
+        // For service accounts, there's no concept of getting access tokens
+        // through user interaction. You directly use the service account's
+        // private key to authenticate.
+        throw new Error('No access tokens needed for service accounts')
+    }
+
+    public saveAccessTokens = (tokens: Credentials): void => {
+        // For service accounts, there's no concept of saving access tokens,
+        // as they use private keys directly and don't have refresh tokens.
+        throw new Error('No access tokens to save for service accounts')
     }
 }
